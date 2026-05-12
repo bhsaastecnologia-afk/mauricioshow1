@@ -88,7 +88,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
    NAV
 ═══════════════════════════════════════ */
 nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
+  position:fixed;top:0;left:0;right:0;z-index:8000;
   padding:.9rem 1.25rem;
   display:flex;align-items:center;justify-content:space-between;
   background:linear-gradient(180deg,rgba(4,4,8,.96) 0%,transparent 100%);
@@ -1274,147 +1274,7 @@ if(typeof gsap!=='undefined'){
 #audioBtn.playing #audioLabel{color:var(--gold);}
 </style>
 
-<script>
-(function(){
-  let audioCtx = null, playing = false, masterGain = null;
-  let scheduledNodes = [];
-  const btn = document.getElementById('audioBtn');
 
-  // ── Guitar string synthesis ──
-  // Karplus-Strong algorithm: pluck a string via noise + IIR filter
-  function pluck(ctx, freq, gain, time, decay){
-    const bufSize = Math.round(ctx.sampleRate / freq);
-    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    // seed with noise
-    for(let i=0;i<bufSize;i++) data[i] = Math.random()*2-1;
-
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.loop = true;
-
-    // Low-pass feedback = Karplus-Strong character
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = freq * 4;
-    lp.Q.value = 0.5;
-
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(gain, time);
-    g.gain.exponentialRampToValueAtTime(0.0001, time + decay);
-
-    src.connect(lp);
-    lp.connect(g);
-    g.connect(masterGain);
-
-    src.start(time);
-    src.stop(time + decay + 0.1);
-    scheduledNodes.push(src);
-    return src;
-  }
-
-  // ── Ambient reverb ──
-  function makeReverb(ctx){
-    const conv = ctx.createConvolver();
-    const len = ctx.sampleRate * 2.5;
-    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
-    for(let c=0;c<2;c++){
-      const d = buf.getChannelData(c);
-      for(let i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 2);
-    }
-    conv.buffer = buf;
-    return conv;
-  }
-
-  // ── Chord patterns (fingerpicking violão) ──
-  // Each chord: array of [freq, delay, gain, decay]
-  // Tuning: standard Em-based ambient fingerpicking
-  const CHORDS = [
-    // Em  — e b g d
-    [[82.4,0,.22,1.8],[123.5,.06,.18,1.6],[196.0,.12,.15,1.4],[246.9,.18,.12,1.3],[329.6,.05,.10,1.2],[392.0,.22,.08,1.1]],
-    // Am
-    [[110.0,0,.22,1.8],[146.8,.06,.18,1.6],[196.0,.12,.14,1.4],[220.0,.18,.12,1.2],[261.6,.05,.10,1.1],[329.6,.22,.08,1.0]],
-    // C
-    [[130.8,0,.22,1.8],[164.8,.06,.18,1.6],[196.0,.12,.14,1.4],[261.6,.18,.12,1.2],[329.6,.05,.10,1.1],[392.0,.22,.08,1.0]],
-    // G
-    [[98.0,0,.22,1.8],[146.8,.06,.18,1.6],[196.0,.12,.14,1.4],[246.9,.18,.12,1.2],[293.7,.05,.10,1.1],[392.0,.22,.08,1.0]],
-  ];
-
-  let chordIdx = 0, loopTimer = null;
-
-  function scheduleChord(startTime){
-    const chord = CHORDS[chordIdx % CHORDS.length];
-    chordIdx++;
-    // fingerpicking pattern: bass + 3 treble arpegio
-    chord.forEach(([freq, del, gain, decay]) => {
-      pluck(audioCtx, freq, gain * 0.7, startTime + del * 0.8, decay * 1.2);
-    });
-    return startTime + 2.4; // chord duration
-  }
-
-  function startLoop(){
-    if(!audioCtx) return;
-    let t = audioCtx.currentTime + 0.1;
-    // Schedule 4 chords ahead
-    for(let i=0;i<4;i++) t = scheduleChord(t);
-    // Keep scheduling
-    loopTimer = setInterval(()=>{
-      if(!playing) return;
-      t = scheduleChord(t);
-      // clean old nodes
-      scheduledNodes = scheduledNodes.filter(n=>{ try{return n.context.currentTime < n.context.currentTime + 5;}catch(e){return false;} });
-    }, 2000);
-  }
-
-  function stopAll(){
-    clearInterval(loopTimer);
-    scheduledNodes.forEach(n=>{ try{ n.stop(audioCtx.currentTime + 0.5); }catch(e){} });
-    scheduledNodes = [];
-    if(masterGain) masterGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
-  }
-
-  btn.addEventListener('click', ()=>{
-    if(!audioCtx){
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      masterGain = audioCtx.createGain();
-      masterGain.gain.value = 0.0001;
-
-      const reverb = makeReverb(audioCtx);
-      const dryGain = audioCtx.createGain();
-      const wetGain = audioCtx.createGain();
-      dryGain.gain.value = 0.65;
-      wetGain.gain.value = 0.35;
-
-      masterGain.connect(dryGain);
-      masterGain.connect(reverb);
-      reverb.connect(wetGain);
-      dryGain.connect(audioCtx.destination);
-      wetGain.connect(audioCtx.destination);
-    }
-
-    if(!playing){
-      playing = true;
-      btn.classList.add('playing');
-      masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-      masterGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-      masterGain.gain.linearRampToValueAtTime(0.9, audioCtx.currentTime + 1.5);
-      if(audioCtx.state === 'suspended') audioCtx.resume();
-      startLoop();
-      // Mascot reacts
-      if(typeof showMsg === 'function') showMsg();
-      else {
-        const b = document.getElementById('gmBubble');
-        const t = document.getElementById('gmText');
-        if(b && t){ t.textContent = "🎵 Música ambiente ligada! Que vibe!"; b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),3500); }
-      }
-    } else {
-      playing = false;
-      btn.classList.remove('playing');
-      stopAll();
-    }
-  });
-})();
-</script>
 
 
 <style>
@@ -1447,20 +1307,29 @@ if(typeof gsap!=='undefined'){
 
 /* ── MOBILE MENU OVERLAY ── */
 #mobileMenu{
-  position:fixed;inset:0;z-index:300;
-  background:rgba(4,4,8,.97);
-  backdrop-filter:blur(20px);
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  width:100%;height:100%;
+  z-index:9000;
+  background:#040408;
   display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;
-  transition:opacity .4s ease;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .35s ease, visibility .35s ease;
+  overflow:hidden;
 }
-#mobileMenu.open{opacity:1;pointer-events:auto;}
-
+#mobileMenu.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
 #mmInner{
   display:flex;flex-direction:column;
   align-items:center;gap:0;
-  width:100%;padding:2rem 2rem 3rem;
-  transform:translateY(20px);
+  width:100%;
+  padding:2rem 2rem 3rem;
+  transform:translateY(24px);
   transition:transform .4s ease;
 }
 #mobileMenu.open #mmInner{transform:translateY(0);}
@@ -1533,185 +1402,203 @@ if(typeof gsap!=='undefined'){
 <script>
 (function(){
   const btn = document.getElementById('audioBtn');
-  let ctx=null, master=null, rev=null, dry=null, wet=null;
-  let playing=false, scheduler=null, tick=0;
+  let ctx=null, master=null, playing=false, scheduler=null, progIdx=0;
 
-  // ── Build reverb impulse (warm room) ──
-  function buildReverb(c){
-    const conv=c.createConvolver();
-    const sr=c.sampleRate, len=sr*2.8;
-    const b=c.createBuffer(2,len,sr);
+  // ── Init AudioContext on first user gesture (iOS/Android safe) ──
+  function initCtx(){
+    if(ctx) return true;
+    try{
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e){ alert('Áudio não suportado neste dispositivo.'); return false; }
+
+    master = ctx.createGain();
+    master.gain.value = 0.0001;
+
+    // Reverb
+    const conv = ctx.createConvolver();
+    const len  = ctx.sampleRate * 2.8;
+    const buf  = ctx.createBuffer(2, len, ctx.sampleRate);
     for(let ch=0;ch<2;ch++){
-      const d=b.getChannelData(ch);
-      for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.8);
+      const d = buf.getChannelData(ch);
+      for(let i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 1.8);
     }
-    conv.buffer=b; return conv;
+    conv.buffer = buf;
+
+    const dry = ctx.createGain(); dry.gain.value = 0.62;
+    const wet = ctx.createGain(); wet.gain.value = 0.38;
+    master.connect(dry);   dry.connect(ctx.destination);
+    master.connect(conv);  conv.connect(wet); wet.connect(ctx.destination);
+    return true;
   }
 
-  // ── Pluck one guitar string (Karplus-Strong + warm tone) ──
+  // ── Karplus-Strong pluck ──
   function pluck(freq, when, vol, dur){
-    const sr=ctx.sampleRate;
-    const N=Math.max(2,Math.round(sr/freq));
-    const buf=ctx.createBuffer(1,N,sr);
-    const d=buf.getChannelData(0);
-    for(let i=0;i<N;i++) d[i]=(Math.random()*2-1)*0.6 + Math.sin(2*Math.PI*i/N)*0.4;
+    const sr = ctx.sampleRate;
+    const N  = Math.max(2, Math.round(sr / freq));
+    const b  = ctx.createBuffer(1, N, sr);
+    const d  = b.getChannelData(0);
+    for(let i=0;i<N;i++) d[i] = (Math.random()*2-1)*0.55 + Math.sin(2*Math.PI*i/N)*0.45;
 
-    const src=ctx.createBufferSource();
-    src.buffer=buf; src.loop=true;
+    const src  = ctx.createBufferSource();
+    src.buffer = b; src.loop = true;
 
-    const lp=ctx.createBiquadFilter();
-    lp.type='lowpass';
-    lp.frequency.value=Math.min(freq*6,3500);
-    lp.Q.value=0.4;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = Math.min(freq*6, 3400);
+    lp.Q.value = 0.35;
 
-    // Body warmth
-    const body=ctx.createBiquadFilter();
-    body.type='peaking';
-    body.frequency.value=200;
-    body.gain.value=4;
-    body.Q.value=1.5;
+    const warm = ctx.createBiquadFilter();
+    warm.type = 'peaking'; warm.frequency.value = 220;
+    warm.gain.value = 5; warm.Q.value = 1.2;
 
-    // Harmonic presence
-    const pres=ctx.createBiquadFilter();
-    pres.type='peaking';
-    pres.frequency.value=1800;
-    pres.gain.value=2;
-    pres.Q.value=2;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, when);
+    env.gain.linearRampToValueAtTime(vol,      when + 0.006);
+    env.gain.exponentialRampToValueAtTime(vol*0.5, when + dur*0.4);
+    env.gain.exponentialRampToValueAtTime(0.0001,  when + dur);
 
-    const env=ctx.createGain();
-    env.gain.setValueAtTime(0.0001,when);
-    env.gain.linearRampToValueAtTime(vol, when+0.005);
-    env.gain.exponentialRampToValueAtTime(vol*0.55, when+dur*0.35);
-    env.gain.exponentialRampToValueAtTime(0.0001, when+dur);
-
-    src.connect(lp); lp.connect(body); body.connect(pres); pres.connect(env); env.connect(master);
-    src.start(when); src.stop(when+dur+0.05);
+    src.connect(lp); lp.connect(warm); warm.connect(env); env.connect(master);
+    src.start(when); src.stop(when + dur + 0.05);
   }
 
-  // ── Song: E minor fingerpicking ballad ──
-  // BPM 68 — slow, emotional, melodic
+  // ── Song: E minor ballad fingerpicking BPM 68 ──
   const BPM=68, B=60/BPM;
 
-  // Each chord pattern: [[freq, offsetBeats, vol, decayBeats], ...]
-  // Fingerpicking: bass note → mid → treble → melody note
-  const PATTERNS = [
-    // Em — E bass + G B E arpeggio + melody
-    { name:'Em', notes:[
-      [82.4,  0,    0.28, 3.2],  // E2 bass
-      [196.0, 0.5,  0.14, 2.0],  // G3
-      [246.9, 1.0,  0.16, 1.8],  // B3
-      [329.6, 1.5,  0.18, 1.6],  // E4 melody
-      [392.0, 2.0,  0.12, 1.4],  // G4
-      [246.9, 2.5,  0.14, 1.2],  // B3
-      [329.6, 3.0,  0.20, 1.5],  // E4 melody repeat
-      [196.0, 3.5,  0.10, 1.0],  // G3 fill
-    ]},
-    // C — C bass + E G C arpeggio
-    { name:'C', notes:[
-      [130.8, 0,    0.26, 3.2],  // C3 bass
-      [164.8, 0.5,  0.13, 2.0],  // E3
-      [196.0, 1.0,  0.15, 1.8],  // G3
-      [261.6, 1.5,  0.18, 1.6],  // C4 melody
-      [329.6, 2.0,  0.14, 1.4],  // E4
-      [261.6, 2.5,  0.12, 1.2],  // C4
-      [329.6, 3.0,  0.16, 1.5],  // E4 melody
-      [196.0, 3.5,  0.10, 1.0],  // G3 fill
-    ]},
-    // G — G bass + D G B arpeggio
-    { name:'G', notes:[
-      [98.0,  0,    0.28, 3.2],  // G2 bass
-      [196.0, 0.5,  0.13, 2.0],  // G3
-      [246.9, 1.0,  0.15, 1.8],  // B3
-      [293.7, 1.5,  0.18, 1.6],  // D4
-      [392.0, 2.0,  0.20, 1.4],  // G4 melody high
-      [293.7, 2.5,  0.12, 1.2],  // D4
-      [246.9, 3.0,  0.16, 1.5],  // B3
-      [196.0, 3.5,  0.10, 1.0],  // G3
-    ]},
-    // D — D bass + F# A D
-    { name:'D', notes:[
-      [146.8, 0,    0.26, 3.2],  // D3 bass
-      [185.0, 0.5,  0.13, 2.0],  // F#3
-      [220.0, 1.0,  0.15, 1.8],  // A3
-      [293.7, 1.5,  0.18, 1.6],  // D4 melody
-      [369.9, 2.0,  0.18, 1.4],  // F#4 melody high
-      [293.7, 2.5,  0.12, 1.2],  // D4
-      [220.0, 3.0,  0.14, 1.5],  // A3
-      [185.0, 3.5,  0.10, 1.0],  // F#3
-    ]},
-    // Am — A bass + E A C
-    { name:'Am', notes:[
-      [110.0, 0,    0.27, 3.2],  // A2 bass
-      [164.8, 0.5,  0.13, 2.0],  // E3
-      [220.0, 1.0,  0.15, 1.8],  // A3
-      [261.6, 1.5,  0.17, 1.6],  // C4 melody
-      [329.6, 2.0,  0.19, 1.4],  // E4 melody high
-      [261.6, 2.5,  0.12, 1.2],  // C4
-      [220.0, 3.0,  0.14, 1.5],  // A3
-      [164.8, 3.5,  0.10, 1.0],  // E3
-    ]},
+  // Progression: Em  C  G  D  Em  Am  C  G
+  const PROG = [
+    // Em
+    [[82.4,0,.26,3.0],[196,0.45,.13,1.8],[246.9,0.9,.15,1.6],[329.6,1.35,.17,1.5],
+     [392,1.8,.12,1.3],[329.6,2.25,.14,1.4],[246.9,2.7,.11,1.2],[196,3.15,.09,1.0]],
+    // C
+    [[130.8,0,.25,3.0],[164.8,0.45,.12,1.8],[196,0.9,.14,1.6],[261.6,1.35,.17,1.5],
+     [329.6,1.8,.13,1.3],[261.6,2.25,.12,1.4],[196,2.7,.10,1.2],[164.8,3.15,.08,1.0]],
+    // G
+    [[98,0,.27,3.0],[196,0.45,.12,1.8],[246.9,0.9,.14,1.6],[293.7,1.35,.17,1.5],
+     [392,1.8,.19,1.3],[293.7,2.25,.12,1.4],[246.9,2.7,.10,1.2],[196,3.15,.08,1.0]],
+    // D
+    [[146.8,0,.25,3.0],[185,0.45,.12,1.8],[220,0.9,.14,1.6],[293.7,1.35,.17,1.5],
+     [369.9,1.8,.17,1.3],[293.7,2.25,.12,1.4],[220,2.7,.10,1.2],[185,3.15,.08,1.0]],
+    // Am
+    [[110,0,.26,3.0],[164.8,0.45,.12,1.8],[220,0.9,.14,1.6],[261.6,1.35,.16,1.5],
+     [329.6,1.8,.18,1.3],[261.6,2.25,.12,1.4],[220,2.7,.10,1.2],[164.8,3.15,.08,1.0]],
   ];
+  const SEQ = [0,1,2,3, 0,4,1,2]; // Em C G D  Em Am C G
 
-  // Progression: Em C G D  Em C Am D  (×∞)
-  const PROG=[0,1,2,3, 0,1,4,3];
-  let progIdx=0;
-
-  function scheduleBar(startTime){
-    const pat=PATTERNS[PROG[progIdx % PROG.length]];
+  function scheduleBar(t){
+    const chord = PROG[SEQ[progIdx % SEQ.length]];
     progIdx++;
-    pat.notes.forEach(([freq,offB,vol,decB])=>{
-      pluck(freq, startTime + offB*B, vol, decB*B);
+    chord.forEach(([freq,offB,vol,decB])=>{
+      pluck(freq, t + offB*B, vol, decB*B);
     });
-    return startTime + B*4;
+    return t + B*4;
+  }
+
+  let nextBarTime = 0;
+  function tick(){
+    if(!playing) return;
+    // Keep 3 bars scheduled ahead
+    while(nextBarTime < ctx.currentTime + B*12){
+      nextBarTime = scheduleBar(nextBarTime);
+    }
+    scheduler = setTimeout(tick, 500);
   }
 
   function startMusic(){
-    if(!ctx){
-      ctx=new(window.AudioContext||window.webkitAudioContext)();
-      master=ctx.createGain();
-      master.gain.value=0.0001;
-      rev=buildReverb(ctx);
-      dry=ctx.createGain(); dry.gain.value=0.60;
-      wet=ctx.createGain(); wet.gain.value=0.40;
-      master.connect(dry); dry.connect(ctx.destination);
-      master.connect(rev); rev.connect(wet); wet.connect(ctx.destination);
-    }
-    if(ctx.state==='suspended') ctx.resume();
-    master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.setValueAtTime(0.0001,ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0.88,ctx.currentTime+2);
-
-    let t=ctx.currentTime+0.1;
-    // Pre-schedule 3 bars
-    for(let i=0;i<3;i++) t=scheduleBar(t);
-    // Keep scheduling ahead
-    scheduler=setInterval(()=>{
-      if(!playing) return;
-      t=scheduleBar(t);
-    }, B*4*800); // schedule a new bar every ~bar duration ms
+    if(!initCtx()) return;
+    // CRITICAL: resume suspended context (iOS requires this after init)
+    ctx.resume().then(()=>{
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setValueAtTime(0.0001, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(0.9, ctx.currentTime + 2.0);
+      nextBarTime = ctx.currentTime + 0.15;
+      tick();
+    });
   }
 
   function stopMusic(){
-    clearInterval(scheduler);
+    clearTimeout(scheduler);
     if(master){
       master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.setValueAtTime(master.gain.value,ctx.currentTime);
-      master.gain.linearRampToValueAtTime(0.0001,ctx.currentTime+1.5);
+      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
     }
   }
 
-  btn.addEventListener('click',()=>{
-    playing=!playing;
-    btn.classList.toggle('playing',playing);
+  // Use both 'click' and 'touchend' for maximum mobile compatibility
+  function handleToggle(e){
+    e.preventDefault();
+    playing = !playing;
+    btn.classList.toggle('playing', playing);
     if(playing){
       startMusic();
-      const b=document.getElementById('gmBubble'),t=document.getElementById('gmText');
-      if(b&&t){t.textContent="🎵 Música ligada! Relaxa e aproveita!";b.classList.add('show');setTimeout(()=>b.classList.remove('show'),3500);}
+      const b=document.getElementById('gmBubble'), t=document.getElementById('gmText');
+      if(b&&t){ t.textContent="🎵 Música ligada! Relaxa e aproveita!"; b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),3500); }
     } else {
       stopMusic();
     }
-  });
+  }
+
+  btn.addEventListener('touchend', handleToggle, {passive:false});
+  btn.addEventListener('click',    handleToggle);
 })();
+
+<script>
+(function(){
+  const btn  = document.getElementById('hambBtn');
+  const menu = document.getElementById('mobileMenu');
+  if(!btn || !menu) return;
+
+  let scrollY = 0;
+
+  function openMenu(){
+    scrollY = window.scrollY;
+    btn.classList.add('open');
+    btn.setAttribute('aria-expanded','true');
+    menu.classList.add('open');
+    menu.setAttribute('aria-hidden','false');
+    // Lock body scroll on iOS
+    document.body.style.overflow   = 'hidden';
+    document.body.style.position   = 'fixed';
+    document.body.style.top        = '-' + scrollY + 'px';
+    document.body.style.width      = '100%';
+  }
+
+  function closeMenu(){
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded','false');
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden','true');
+    // Restore scroll
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top      = '';
+    document.body.style.width    = '';
+    window.scrollTo(0, scrollY);
+  }
+
+  // Toggle on click/touch
+  function toggleMenu(e){
+    e.preventDefault();
+    e.stopPropagation();
+    btn.classList.contains('open') ? closeMenu() : openMenu();
+  }
+  btn.addEventListener('click',    toggleMenu);
+  btn.addEventListener('touchend', toggleMenu, {passive:false});
+
+  // Close when a nav link is tapped
+  document.querySelectorAll('[data-close]').forEach(a => {
+    a.addEventListener('click',    ()=> setTimeout(closeMenu, 60));
+    a.addEventListener('touchend', e => { e.preventDefault(); setTimeout(closeMenu, 60); }, {passive:false});
+  });
+
+  // Close on backdrop tap
+  menu.addEventListener('click',    e => { if(e.target === menu) closeMenu(); });
+  menu.addEventListener('touchend', e => { if(e.target === menu){ e.preventDefault(); closeMenu(); } }, {passive:false});
+
+  // Close on Escape
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeMenu(); });
+})();
+</script>
 
 </body>
 </html>
