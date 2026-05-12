@@ -654,8 +654,36 @@ body.pop{--gold:#00BCD4;--blue:#006064;}
     <li><a href="#evento">Evento</a></li>
     <li><a href="#depoimentos">Depoimentos</a></li>
   </ul>
-  <a href="#evento"><button class="nav-cta">📱 Contratar</button></a>
+  <div style="display:flex;align-items:center;gap:.75rem;">
+    <a href="#evento" class="nav-cta-wrap"><button class="nav-cta">📱 Contratar</button></a>
+    <button id="hambBtn" aria-label="Menu" aria-expanded="false">
+      <svg id="menuIconEq" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="16">
+        <rect class="mb" x="0"  y="8"  width="3" height="8"  rx="1.5" fill="currentColor"/>
+        <rect class="mb" x="5"  y="3"  width="3" height="13" rx="1.5" fill="currentColor"/>
+        <rect class="mb" x="10" y="6"  width="3" height="10" rx="1.5" fill="currentColor"/>
+        <rect class="mb" x="15" y="1"  width="3" height="15" rx="1.5" fill="currentColor"/>
+        <rect class="mb" x="20" y="5"  width="2" height="11" rx="1"   fill="currentColor"/>
+      </svg>
+    </button>
+  </div>
 </nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div id="mobileMenu" aria-hidden="true">
+  <div id="mmInner">
+    <div id="mmLogo">M<span>.</span>Santos</div>
+    <nav id="mmNav">
+      <a href="#hero"        class="mm-link" data-close>Início</a>
+      <a href="#sobre"       class="mm-link" data-close>Sobre</a>
+      <a href="#evento"      class="mm-link" data-close>Monte seu Evento</a>
+      <a href="#depoimentos" class="mm-link" data-close>Depoimentos</a>
+    </nav>
+    <a href="https://wa.me/5511958181611" target="_blank" class="mm-wpp">
+      📱 Chamar no WhatsApp
+    </a>
+    <div id="mmFooter">@mauriciosantoscantor</div>
+  </div>
+</div>
 
 <!-- ══════ HERO ══════ -->
 <section id="hero">
@@ -753,30 +781,23 @@ body.pop{--gold:#00BCD4;--blue:#006064;}
     <div class="eb-div"></div>
 
     <!-- 02 ESTILO -->
-    <div class="step-lbl">// 02 — Estilo musical</div>
-    <div class="step-title">Qual o clima da festa?</div>
+    <div class="step-lbl">// 02 — Estilos musicais</div>
+    <div class="step-title">Qual o estilo? <span style="font-size:11px;color:rgba(255,255,255,.3);letter-spacing:.04em;font-family:'Rajdhani',sans-serif;text-transform:none;">(pode marcar mais de um)</span></div>
     <div class="chips" id="estyles">
-      <div class="chip" data-v="Sertanejo" data-t="sertanejo">🤠 Sertanejo</div>
-      <div class="chip" data-v="MPB" data-t="mpb">🎭 MPB</div>
-      <div class="chip" data-v="Pagode" data-t="pagode">🥁 Pagode</div>
-      <div class="chip" data-v="Romântico" data-t="romantico">❤️ Romântico</div>
-      <div class="chip" data-v="Pop" data-t="pop">✨ Pop</div>
-      <div class="chip" data-v="Misto" data-t="">🎵 Misto</div>
+      <div class="chip" data-v="Sertanejo">🤠 Sertanejo</div>
+      <div class="chip" data-v="MPB">🎭 MPB</div>
+      <div class="chip" data-v="Romântico">❤️ Romântico</div>
+      <div class="chip" data-v="Pop">✨ Pop</div>
+      <div class="chip" data-v="Pop Rock">🎸 Pop Rock</div>
+      <div class="chip" data-v="Rock Nacional">🇧🇷 Rock Nacional</div>
+      <div class="chip" data-v="Rock Internacional">🌎 Rock Internacional</div>
+      <div class="chip" data-v="Anos 80">📼 Anos 80</div>
     </div>
 
     <div class="eb-div"></div>
 
-    <!-- 03 REPERTÓRIO -->
-    <div class="step-lbl">// 03 — Repertório</div>
-    <div class="step-title">Escolha músicas</div>
-    <div class="srch"><input type="text" placeholder="Pesquisar música..." id="srch" oninput="filterS(this.value)"></div>
-    <div class="sel-count" id="scnt">0 músicas selecionadas</div>
-    <div class="sg" id="sgrid"></div>
-
-    <div class="eb-div"></div>
-
     <!-- 04 DADOS -->
-    <div class="step-lbl">// 04 — Seus dados</div>
+    <div class="step-lbl">// 02 — Seus dados</div>
     <div class="step-title">Onde e quando?</div>
     <div class="ef-row">
       <div class="ef"><label>Seu nome</label><input type="text" id="cname" placeholder="Ex: Ana Paula" oninput="upSum()"></div>
@@ -794,10 +815,8 @@ body.pop{--gold:#00BCD4;--blue:#006064;}
       <div class="sum-head">// Resumo do evento</div>
       <div class="sum-grid">
         <div class="si">Tipo<strong id="s-type">—</strong></div>
-        <div class="si">Estilo<strong id="s-style">—</strong></div>
         <div class="si">Data<strong id="s-date">—</strong></div>
         <div class="si">Cidade<strong id="s-city">—</strong></div>
-        <div class="si">Músicas<strong id="s-songs">—</strong></div>
         <div class="si">Especial<strong id="s-sp">—</strong></div>
       </div>
     </div>
@@ -914,70 +933,31 @@ document.addEventListener('mousemove',e=>{
 const io=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:.2});
 document.querySelectorAll('.tli').forEach((el,i)=>{el.style.transitionDelay=i*.12+'s';io.observe(el);});
 
-// ── SONGS ──
-const SONGS=[
-  'Perfect — Ed Sheeran','Thinking Out Loud — Ed Sheeran',
-  'Shallow — Lady Gaga','Someone Like You — Adele',
-  'Evidências — Chitãozinho & Xororó','Amor Perfeito — Zezé di Camargo',
-  'Minha Vida — Lulu Santos','Como Uma Onda — Lulu Santos',
-  'Ai Se Eu Te Pego — Michel Teló','Você Partiu Meu Coração — Wesley Safadão',
-  'Inevitável — Djavan','Flor de Lis — Djavan',
-  'Chega de Saudade — João Gilberto','Garota de Ipanema — Tom Jobim',
-  'Eduardo e Mônica — Legião Urbana','Como Nossos Pais — Elis Regina',
-  'O Leãozinho — Caetano Veloso','Hallelujah — Leonard Cohen',
-  'Hotel California — Eagles','Wish You Were Here — Pink Floyd',
-  'Wonderwall — Oasis','Come As You Are — Nirvana',
-  'Pais e Filhos — Legião Urbana','Amo Noite e Dia — Seu Jorge',
-  'Tudo Que Você Quiser — Marcos & Belutti',
-  'Coração em Pedaços — Zezé di Camargo',
-  'Wave — Tom Jobim','Tanto Tempo — Lenine',
-];
-let selSongs=[],selType='',selStyle='';
-const sg=document.getElementById('sgrid');
-function renderS(list){
-  sg.innerHTML='';
-  list.forEach(s=>{
-    const d=document.createElement('div');
-    d.className='sc'+(selSongs.includes(s)?' active':'');
-    d.innerHTML=`<div class="dot"></div><span>${s}</span>`;
-    d.addEventListener('click',()=>toggleS(s,d));
-    sg.appendChild(d);
-  });
-}
-function toggleS(s,el){
-  const i=selSongs.indexOf(s);
-  if(i===-1){selSongs.push(s);el.classList.add('active');}
-  else{selSongs.splice(i,1);el.classList.remove('active');}
-  const n=selSongs.length;
-  document.getElementById('scnt').textContent=n+' música'+(n!==1?'s':'')+' selecionada'+(n!==1?'s':'');
-  upSum();
-}
-function filterS(q){renderS(SONGS.filter(s=>s.toLowerCase().includes(q.toLowerCase())));}
-renderS(SONGS);
-
-// chips
+// ── CHIPS ──
+let selType='', selStyles=[];
 document.querySelectorAll('#etypes .chip').forEach(c=>{
   c.addEventListener('click',function(){
     document.querySelectorAll('#etypes .chip').forEach(x=>x.classList.remove('active'));
-    this.classList.add('active');selType=this.dataset.v;upSum();
+    this.classList.add('active'); selType=this.dataset.v; upSum();
   });
 });
 document.querySelectorAll('#estyles .chip').forEach(c=>{
   c.addEventListener('click',function(){
-    document.querySelectorAll('#estyles .chip').forEach(x=>x.classList.remove('active'));
-    this.classList.add('active');selStyle=this.dataset.v;
-    document.body.className=this.dataset.t||'';upSum();
+    this.classList.toggle('active');
+    const v=this.dataset.v, i=selStyles.indexOf(v);
+    if(i===-1) selStyles.push(v); else selStyles.splice(i,1);
+    upSum();
   });
 });
 
 // summary
 function upSum(){
   document.getElementById('s-type').textContent=selType||'—';
-  document.getElementById('s-style').textContent=selStyle||'—';
+  document.getElementById('s-style').textContent=selStyles.length?selStyles.join(', '):'—';
+
   const dv=document.getElementById('edate').value;
   document.getElementById('s-date').textContent=dv?new Date(dv+'T12:00').toLocaleDateString('pt-BR'):'—';
   document.getElementById('s-city').textContent=document.getElementById('ecity').value||'—';
-  document.getElementById('s-songs').textContent=selSongs.length?selSongs.length+' selecionadas':'—';
   document.getElementById('s-sp').textContent=document.getElementById('esong').value||'—';
 }
 
@@ -990,18 +970,17 @@ function goWpp(){
   const ob=document.getElementById('eobs').value;
   const sp=document.getElementById('esong').value;
   const df=dt?new Date(dt+'T12:00').toLocaleDateString('pt-BR'):'A definir';
-  const sl=selSongs.length?selSongs.slice(0,8).join(', ')+(selSongs.length>8?` e mais ${selSongs.length-8}`:''):'A definir';
+  const stylesStr=selStyles.length?selStyles.join(', '):'A definir';
   const msg=`🎵 *CONTRATAÇÃO — Mauricio Santos*
 
 Olá! Vim pelo site e quero montar meu evento:
 
 👤 *Nome:* ${nm}
 🎉 *Evento:* ${selType||'A definir'}
-🎵 *Estilo:* ${selStyle||'A definir'}
+🎵 *Estilos:* ${stylesStr}
 📅 *Data:* ${df}${tm?' às '+tm:''}
 📍 *Cidade:* ${ct||'A definir'}
 
-🎶 *Repertório:* ${sl}
 ✨ *Especial:* ${sp||'A definir'}
 📝 *Obs:* ${ob||'Nenhuma'}
 
@@ -1020,5 +999,719 @@ if(typeof gsap!=='undefined'){
   });
 }
 </script>
+
+<!-- ══════ FLOATING GUITAR MASCOT ══════ -->
+<div id="guitarMascot">
+  <div id="gmBubble" class="gm-bubble">
+    <span id="gmText"></span>
+    <div class="gm-bubble-tail"></div>
+  </div>
+  <svg id="guitarSvg" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg">
+    <!-- neck -->
+    <rect x="54" y="8" width="12" height="72" rx="4" fill="#8B5E3C"/>
+    <!-- frets -->
+    <line x1="54" y1="26" x2="66" y2="26" stroke="#C9952B" stroke-width="1.5" opacity=".7"/>
+    <line x1="54" y1="38" x2="66" y2="38" stroke="#C9952B" stroke-width="1.5" opacity=".7"/>
+    <line x1="54" y1="50" x2="66" y2="50" stroke="#C9952B" stroke-width="1.5" opacity=".7"/>
+    <line x1="54" y1="62" x2="66" y2="62" stroke="#C9952B" stroke-width="1.5" opacity=".7"/>
+    <!-- headstock -->
+    <rect x="50" y="2" width="20" height="14" rx="3" fill="#6B4226"/>
+    <!-- tuning pegs -->
+    <circle cx="50" cy="6" r="3" fill="#C9952B"/><circle cx="70" cy="6" r="3" fill="#C9952B"/>
+    <circle cx="50" cy="12" r="3" fill="#C9952B"/><circle cx="70" cy="12" r="3" fill="#C9952B"/>
+    <!-- body upper bout -->
+    <ellipse cx="60" cy="105" rx="28" ry="22" fill="#A0522D"/>
+    <!-- waist -->
+    <rect x="47" y="118" width="26" height="14" rx="2" fill="#8B4513"/>
+    <!-- body lower bout -->
+    <ellipse cx="60" cy="145" rx="34" ry="28" fill="#A0522D"/>
+    <!-- body shading -->
+    <ellipse cx="60" cy="145" rx="30" ry="24" fill="none" stroke="#6B3010" stroke-width="2" opacity=".4"/>
+    <!-- sound hole -->
+    <circle cx="60" cy="115" r="10" fill="#1a0a00"/>
+    <circle cx="60" cy="115" r="10" fill="none" stroke="#C9952B" stroke-width="1.5" opacity=".6"/>
+    <!-- rosette rings -->
+    <circle cx="60" cy="115" r="7" fill="none" stroke="#F0C060" stroke-width=".8" opacity=".4"/>
+    <!-- bridge -->
+    <rect x="48" y="148" width="24" height="6" rx="2" fill="#4a2000"/>
+    <!-- strings -->
+    <line x1="56" y1="8" x2="53" y2="154" stroke="rgba(255,255,255,0.35)" stroke-width=".8"/>
+    <line x1="58" y1="8" x2="56" y2="154" stroke="rgba(255,255,255,0.35)" stroke-width=".8"/>
+    <line x1="60" y1="8" x2="59" y2="154" stroke="rgba(255,255,255,0.35)" stroke-width=".8"/>
+    <line x1="62" y1="8" x2="62" y2="154" stroke="rgba(255,255,255,0.35)" stroke-width=".8"/>
+    <line x1="64" y1="8" x2="65" y2="154" stroke="rgba(255,255,255,0.35)" stroke-width=".8"/>
+    <line x1="66" y1="8" x2="68" y2="154" stroke="rgba(255,255,255,0.35)" stroke-width=".8"/>
+    <!-- shine -->
+    <ellipse cx="48" cy="120" rx="5" ry="12" fill="rgba(255,255,255,0.07)" transform="rotate(-20 48 120)"/>
+    <!-- animated strum hand -->
+    <g id="strumHand">
+      <ellipse cx="78" cy="130" rx="7" ry="5" rx="6" fill="#C68642" transform="rotate(-30 78 130)"/>
+      <rect x="74" y="122" width="4" height="9" rx="2" fill="#C68642" transform="rotate(-20 76 126)"/>
+      <rect x="79" y="120" width="4" height="9" rx="2" fill="#C68642" transform="rotate(-10 81 124)"/>
+    </g>
+    <!-- glow dots (music notes that float up) -->
+    <circle id="gn1" cx="90" cy="100" r="3" fill="#C9952B" opacity="0"/>
+    <circle id="gn2" cx="95" cy="85"  r="2" fill="#00D4FF" opacity="0"/>
+    <circle id="gn3" cx="85" cy="90"  r="2.5" fill="#8B5CF6" opacity="0"/>
+  </svg>
+</div>
+
+<style>
+#guitarMascot{
+  position:fixed;
+  bottom:1.5rem;right:1rem;
+  z-index:500;
+  display:flex;flex-direction:column;align-items:flex-end;gap:.5rem;
+  pointer-events:none;
+}
+#guitarSvg{
+  width:80px;height:120px;
+  filter:drop-shadow(0 0 12px rgba(201,149,43,.5));
+  animation:gmFloat 4s ease-in-out infinite, gmSway 8s ease-in-out infinite;
+  transform-origin:60px 80px;
+  pointer-events:auto;
+  cursor:pointer;
+}
+@keyframes gmFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+}
+@keyframes gmSway{
+  0%,100%{transform:rotate(0deg);}
+  25%{transform:rotate(3deg);}
+  75%{transform:rotate(-3deg);}
+}
+#strumHand{
+  transform-origin:78px 115px;
+  animation:strum 0.55s ease-in-out infinite alternate;
+}
+@keyframes strum{
+  from{transform:rotate(-18deg);}
+  to{transform:rotate(12deg);}
+}
+.gm-bubble{
+  background:rgba(10,12,20,.92);
+  border:1px solid rgba(201,149,43,.35);
+  backdrop-filter:blur(12px);
+  border-radius:12px 12px 0 12px;
+  padding:.6rem .9rem;
+  max-width:200px;
+  min-width:120px;
+  position:relative;
+  opacity:0;
+  transform:translateY(6px) scale(.95);
+  transition:opacity .4s ease,transform .4s ease;
+  pointer-events:auto;
+}
+.gm-bubble.show{
+  opacity:1;transform:translateY(0) scale(1);
+}
+.gm-bubble-tail{
+  position:absolute;bottom:-8px;right:18px;
+  width:0;height:0;
+  border-left:8px solid transparent;
+  border-right:0 solid transparent;
+  border-top:8px solid rgba(201,149,43,.35);
+}
+#gmText{
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;line-height:1.4;
+  color:rgba(255,255,255,.88);font-weight:500;
+}
+/* note particles */
+.gnote{
+  position:fixed;
+  font-size:16px;
+  color:var(--gold);
+  pointer-events:none;
+  z-index:499;
+  opacity:0;
+  animation:floatNote 2s ease forwards;
+}
+@keyframes floatNote{
+  0%{opacity:.9;transform:translateY(0) rotate(0deg) scale(1);}
+  100%{opacity:0;transform:translateY(-80px) rotate(20deg) scale(.6);}
+}
+</style>
+
+<script>
+(function(){
+  const MSGS = [
+    "🎸 Oi! Vou fazer sua festa inesquecível!",
+    "🎵 Tenho o repertório perfeito pra você!",
+    "✨ Casamentos, festas, eventos... é só chamar!",
+    "🎶 Cada show é único. Vem comigo!",
+    "❤️ A música certa transforma qualquer momento.",
+    "🌟 Mais de 100 shows de sucesso!",
+    "🎤 Voz e violão que emocionam de verdade.",
+    "🥂 Seu evento merece uma experiência especial!",
+    "📱 Me chama no WhatsApp, tô esperando!",
+    "🎵 Ribeirão Pires e toda Grande SP!",
+  ];
+  let idx = 0;
+  const bubble = document.getElementById('gmBubble');
+  const gmText = document.getElementById('gmText');
+  const svg    = document.getElementById('guitarSvg');
+
+  function showMsg(){
+    gmText.textContent = MSGS[idx % MSGS.length];
+    bubble.classList.add('show');
+    idx++;
+    setTimeout(()=>{ bubble.classList.remove('show'); }, 3800);
+  }
+
+  // Show first message after 2s, then cycle every 7s
+  setTimeout(showMsg, 2000);
+  setInterval(showMsg, 7000);
+
+  // Click shows message immediately + spawns notes
+  svg.addEventListener('click', ()=>{
+    showMsg();
+    spawnNotes();
+  });
+
+  function spawnNotes(){
+    const rect = svg.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    ['♪','♫','♬','🎵'].forEach((n,i)=>{
+      setTimeout(()=>{
+        const el = document.createElement('div');
+        el.className = 'gnote';
+        el.textContent = n;
+        el.style.left = (cx + (Math.random()-0.5)*40) + 'px';
+        el.style.top  = (cy - 20 + Math.random()*20) + 'px';
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(), 2100);
+      }, i*150);
+    });
+  }
+
+  // Spawn notes periodically on own
+  setInterval(spawnNotes, 9000);
+})();
+</script>
+
+
+<!-- ══════ AMBIENT AUDIO ══════ -->
+<div id="audioBtn" title="Música ambiente">
+  <div id="audioBtnInner">
+    <svg id="audioIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path id="iconPath" d="M9 18V5l12-2v13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="18" cy="16" r="3" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <div id="eqViz">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+  <div id="audioLabel">Música</div>
+</div>
+
+<style>
+#audioBtn{
+  position:fixed;bottom:1.5rem;left:1rem;
+  z-index:501;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
+}
+#audioBtnInner{
+  width:48px;height:48px;
+  border-radius:50%;
+  background:rgba(10,12,20,.88);
+  border:1px solid rgba(201,149,43,.35);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .3s,box-shadow .3s;
+  position:relative;
+  overflow:hidden;
+}
+#audioBtnInner::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,149,43,.12) 0%,transparent 70%);
+  animation:abPulse 2s ease-in-out infinite;
+  opacity:0;transition:opacity .3s;
+}
+#audioBtn.playing #audioBtnInner{
+  border-color:var(--gold);
+  box-shadow:0 0 20px rgba(201,149,43,.35);
+}
+#audioBtn.playing #audioBtnInner::before{opacity:1;}
+@keyframes abPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+#audioIcon{
+  width:20px;height:20px;
+  color:rgba(255,255,255,.55);
+  transition:color .3s,opacity .3s;
+  position:absolute;
+}
+#audioBtn.playing #audioIcon{opacity:0;}
+#eqViz{
+  display:flex;align-items:flex-end;gap:2px;
+  height:18px;opacity:0;transition:opacity .3s;
+  position:absolute;
+}
+#audioBtn.playing #eqViz{opacity:1;}
+#eqViz span{
+  width:3px;border-radius:2px;
+  background:var(--gold);
+  animation:eqV .6s ease-in-out infinite alternate;
+}
+#eqViz span:nth-child(1){--h:6px;animation-delay:0s;}
+#eqViz span:nth-child(2){--h:14px;animation-delay:.1s;}
+#eqViz span:nth-child(3){--h:10px;animation-delay:.2s;}
+#eqViz span:nth-child(4){--h:16px;animation-delay:.05s;}
+#eqViz span:nth-child(5){--h:8px;animation-delay:.15s;}
+@keyframes eqV{from{height:3px}to{height:var(--h,10px)}}
+#audioLabel{
+  font-family:'Orbitron',sans-serif;
+  font-size:7px;letter-spacing:.3em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.3);
+  transition:color .3s;
+}
+#audioBtn.playing #audioLabel{color:var(--gold);}
+</style>
+
+<script>
+(function(){
+  let audioCtx = null, playing = false, masterGain = null;
+  let scheduledNodes = [];
+  const btn = document.getElementById('audioBtn');
+
+  // ── Guitar string synthesis ──
+  // Karplus-Strong algorithm: pluck a string via noise + IIR filter
+  function pluck(ctx, freq, gain, time, decay){
+    const bufSize = Math.round(ctx.sampleRate / freq);
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    // seed with noise
+    for(let i=0;i<bufSize;i++) data[i] = Math.random()*2-1;
+
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+
+    // Low-pass feedback = Karplus-Strong character
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = freq * 4;
+    lp.Q.value = 0.5;
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(gain, time);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + decay);
+
+    src.connect(lp);
+    lp.connect(g);
+    g.connect(masterGain);
+
+    src.start(time);
+    src.stop(time + decay + 0.1);
+    scheduledNodes.push(src);
+    return src;
+  }
+
+  // ── Ambient reverb ──
+  function makeReverb(ctx){
+    const conv = ctx.createConvolver();
+    const len = ctx.sampleRate * 2.5;
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for(let c=0;c<2;c++){
+      const d = buf.getChannelData(c);
+      for(let i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 2);
+    }
+    conv.buffer = buf;
+    return conv;
+  }
+
+  // ── Chord patterns (fingerpicking violão) ──
+  // Each chord: array of [freq, delay, gain, decay]
+  // Tuning: standard Em-based ambient fingerpicking
+  const CHORDS = [
+    // Em  — e b g d
+    [[82.4,0,.22,1.8],[123.5,.06,.18,1.6],[196.0,.12,.15,1.4],[246.9,.18,.12,1.3],[329.6,.05,.10,1.2],[392.0,.22,.08,1.1]],
+    // Am
+    [[110.0,0,.22,1.8],[146.8,.06,.18,1.6],[196.0,.12,.14,1.4],[220.0,.18,.12,1.2],[261.6,.05,.10,1.1],[329.6,.22,.08,1.0]],
+    // C
+    [[130.8,0,.22,1.8],[164.8,.06,.18,1.6],[196.0,.12,.14,1.4],[261.6,.18,.12,1.2],[329.6,.05,.10,1.1],[392.0,.22,.08,1.0]],
+    // G
+    [[98.0,0,.22,1.8],[146.8,.06,.18,1.6],[196.0,.12,.14,1.4],[246.9,.18,.12,1.2],[293.7,.05,.10,1.1],[392.0,.22,.08,1.0]],
+  ];
+
+  let chordIdx = 0, loopTimer = null;
+
+  function scheduleChord(startTime){
+    const chord = CHORDS[chordIdx % CHORDS.length];
+    chordIdx++;
+    // fingerpicking pattern: bass + 3 treble arpegio
+    chord.forEach(([freq, del, gain, decay]) => {
+      pluck(audioCtx, freq, gain * 0.7, startTime + del * 0.8, decay * 1.2);
+    });
+    return startTime + 2.4; // chord duration
+  }
+
+  function startLoop(){
+    if(!audioCtx) return;
+    let t = audioCtx.currentTime + 0.1;
+    // Schedule 4 chords ahead
+    for(let i=0;i<4;i++) t = scheduleChord(t);
+    // Keep scheduling
+    loopTimer = setInterval(()=>{
+      if(!playing) return;
+      t = scheduleChord(t);
+      // clean old nodes
+      scheduledNodes = scheduledNodes.filter(n=>{ try{return n.context.currentTime < n.context.currentTime + 5;}catch(e){return false;} });
+    }, 2000);
+  }
+
+  function stopAll(){
+    clearInterval(loopTimer);
+    scheduledNodes.forEach(n=>{ try{ n.stop(audioCtx.currentTime + 0.5); }catch(e){} });
+    scheduledNodes = [];
+    if(masterGain) masterGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+  }
+
+  btn.addEventListener('click', ()=>{
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.0001;
+
+      const reverb = makeReverb(audioCtx);
+      const dryGain = audioCtx.createGain();
+      const wetGain = audioCtx.createGain();
+      dryGain.gain.value = 0.65;
+      wetGain.gain.value = 0.35;
+
+      masterGain.connect(dryGain);
+      masterGain.connect(reverb);
+      reverb.connect(wetGain);
+      dryGain.connect(audioCtx.destination);
+      wetGain.connect(audioCtx.destination);
+    }
+
+    if(!playing){
+      playing = true;
+      btn.classList.add('playing');
+      masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      masterGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      masterGain.gain.linearRampToValueAtTime(0.9, audioCtx.currentTime + 1.5);
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      startLoop();
+      // Mascot reacts
+      if(typeof showMsg === 'function') showMsg();
+      else {
+        const b = document.getElementById('gmBubble');
+        const t = document.getElementById('gmText');
+        if(b && t){ t.textContent = "🎵 Música ambiente ligada! Que vibe!"; b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),3500); }
+      }
+    } else {
+      playing = false;
+      btn.classList.remove('playing');
+      stopAll();
+    }
+  });
+})();
+</script>
+
+
+<style>
+/* ── HAMBURGER BUTTON ── */
+#hambBtn{
+  display:none;
+  flex-direction:column;justify-content:center;align-items:center;
+  gap:5px;width:40px;height:40px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;
+  cursor:pointer;
+  transition:border-color .3s;
+  flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+#hambBtn svg{color:rgba(255,255,255,.65);transition:color .3s;}
+#hambBtn.open svg{color:var(--gold);}
+#hambBtn.open{border-color:var(--gold);}
+/* EQ bar idle animation */
+#hambBtn .mb{transform-origin:bottom center;animation:eqIdle var(--d,.7s) ease-in-out infinite alternate;}
+#hambBtn .mb:nth-child(1){--d:.55s;animation-delay:0s;}
+#hambBtn .mb:nth-child(2){--d:.8s;animation-delay:.1s;}
+#hambBtn .mb:nth-child(3){--d:.65s;animation-delay:.2s;}
+#hambBtn .mb:nth-child(4){--d:.9s;animation-delay:.05s;}
+#hambBtn .mb:nth-child(5){--d:.7s;animation-delay:.15s;}
+@keyframes eqIdle{from{transform:scaleY(.35)}to{transform:scaleY(1)}}
+/* when open — bars go full height solid */
+#hambBtn.open .mb{animation:none;transform:scaleY(1);}
+
+/* ── MOBILE MENU OVERLAY ── */
+#mobileMenu{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(4,4,8,.97);
+  backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .4s ease;
+}
+#mobileMenu.open{opacity:1;pointer-events:auto;}
+
+#mmInner{
+  display:flex;flex-direction:column;
+  align-items:center;gap:0;
+  width:100%;padding:2rem 2rem 3rem;
+  transform:translateY(20px);
+  transition:transform .4s ease;
+}
+#mobileMenu.open #mmInner{transform:translateY(0);}
+
+#mmLogo{
+  font-family:'Orbitron',sans-serif;
+  font-size:22px;font-weight:700;letter-spacing:.1em;
+  color:#fff;margin-bottom:3rem;
+}
+#mmLogo span{color:var(--gold);}
+
+#mmNav{
+  display:flex;flex-direction:column;
+  align-items:center;gap:0;width:100%;
+}
+.mm-link{
+  display:block;width:100%;text-align:center;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(36px,10vw,52px);
+  letter-spacing:.06em;color:rgba(255,255,255,.55);
+  padding:.4rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  transition:color .25s,letter-spacing .25s;
+  position:relative;overflow:hidden;
+}
+.mm-link::before{
+  content:'';position:absolute;left:0;bottom:0;
+  width:0;height:1px;background:var(--gold);
+  transition:width .3s ease;
+}
+.mm-link:active,.mm-link:hover{
+  color:#fff;letter-spacing:.1em;
+}
+.mm-link:active::before,.mm-link:hover::before{width:100%;}
+
+.mm-wpp{
+  margin-top:2.5rem;
+  display:flex;align-items:center;justify-content:center;
+  gap:.75rem;
+  padding:16px 36px;
+  background:linear-gradient(135deg,#128C7E,#25D366);
+  color:#fff;
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;
+  border-radius:3px;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:box-shadow .3s;
+  width:100%;text-align:center;
+}
+.mm-wpp:active{opacity:.88;}
+
+#mmFooter{
+  margin-top:1.5rem;
+  font-family:'Orbitron',sans-serif;font-size:9px;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);
+}
+
+/* show hamburger only on mobile */
+@media(max-width:767px){
+  #hambBtn{display:flex;}
+  .nav-cta-wrap{display:none;}
+}
+@media(min-width:768px){
+  #mobileMenu{display:none;}
+}
+</style>
+
+<script>
+(function(){
+  const btn = document.getElementById('audioBtn');
+  let ctx=null, master=null, rev=null, dry=null, wet=null;
+  let playing=false, scheduler=null, tick=0;
+
+  // ── Build reverb impulse (warm room) ──
+  function buildReverb(c){
+    const conv=c.createConvolver();
+    const sr=c.sampleRate, len=sr*2.8;
+    const b=c.createBuffer(2,len,sr);
+    for(let ch=0;ch<2;ch++){
+      const d=b.getChannelData(ch);
+      for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.8);
+    }
+    conv.buffer=b; return conv;
+  }
+
+  // ── Pluck one guitar string (Karplus-Strong + warm tone) ──
+  function pluck(freq, when, vol, dur){
+    const sr=ctx.sampleRate;
+    const N=Math.max(2,Math.round(sr/freq));
+    const buf=ctx.createBuffer(1,N,sr);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<N;i++) d[i]=(Math.random()*2-1)*0.6 + Math.sin(2*Math.PI*i/N)*0.4;
+
+    const src=ctx.createBufferSource();
+    src.buffer=buf; src.loop=true;
+
+    const lp=ctx.createBiquadFilter();
+    lp.type='lowpass';
+    lp.frequency.value=Math.min(freq*6,3500);
+    lp.Q.value=0.4;
+
+    // Body warmth
+    const body=ctx.createBiquadFilter();
+    body.type='peaking';
+    body.frequency.value=200;
+    body.gain.value=4;
+    body.Q.value=1.5;
+
+    // Harmonic presence
+    const pres=ctx.createBiquadFilter();
+    pres.type='peaking';
+    pres.frequency.value=1800;
+    pres.gain.value=2;
+    pres.Q.value=2;
+
+    const env=ctx.createGain();
+    env.gain.setValueAtTime(0.0001,when);
+    env.gain.linearRampToValueAtTime(vol, when+0.005);
+    env.gain.exponentialRampToValueAtTime(vol*0.55, when+dur*0.35);
+    env.gain.exponentialRampToValueAtTime(0.0001, when+dur);
+
+    src.connect(lp); lp.connect(body); body.connect(pres); pres.connect(env); env.connect(master);
+    src.start(when); src.stop(when+dur+0.05);
+  }
+
+  // ── Song: E minor fingerpicking ballad ──
+  // BPM 68 — slow, emotional, melodic
+  const BPM=68, B=60/BPM;
+
+  // Each chord pattern: [[freq, offsetBeats, vol, decayBeats], ...]
+  // Fingerpicking: bass note → mid → treble → melody note
+  const PATTERNS = [
+    // Em — E bass + G B E arpeggio + melody
+    { name:'Em', notes:[
+      [82.4,  0,    0.28, 3.2],  // E2 bass
+      [196.0, 0.5,  0.14, 2.0],  // G3
+      [246.9, 1.0,  0.16, 1.8],  // B3
+      [329.6, 1.5,  0.18, 1.6],  // E4 melody
+      [392.0, 2.0,  0.12, 1.4],  // G4
+      [246.9, 2.5,  0.14, 1.2],  // B3
+      [329.6, 3.0,  0.20, 1.5],  // E4 melody repeat
+      [196.0, 3.5,  0.10, 1.0],  // G3 fill
+    ]},
+    // C — C bass + E G C arpeggio
+    { name:'C', notes:[
+      [130.8, 0,    0.26, 3.2],  // C3 bass
+      [164.8, 0.5,  0.13, 2.0],  // E3
+      [196.0, 1.0,  0.15, 1.8],  // G3
+      [261.6, 1.5,  0.18, 1.6],  // C4 melody
+      [329.6, 2.0,  0.14, 1.4],  // E4
+      [261.6, 2.5,  0.12, 1.2],  // C4
+      [329.6, 3.0,  0.16, 1.5],  // E4 melody
+      [196.0, 3.5,  0.10, 1.0],  // G3 fill
+    ]},
+    // G — G bass + D G B arpeggio
+    { name:'G', notes:[
+      [98.0,  0,    0.28, 3.2],  // G2 bass
+      [196.0, 0.5,  0.13, 2.0],  // G3
+      [246.9, 1.0,  0.15, 1.8],  // B3
+      [293.7, 1.5,  0.18, 1.6],  // D4
+      [392.0, 2.0,  0.20, 1.4],  // G4 melody high
+      [293.7, 2.5,  0.12, 1.2],  // D4
+      [246.9, 3.0,  0.16, 1.5],  // B3
+      [196.0, 3.5,  0.10, 1.0],  // G3
+    ]},
+    // D — D bass + F# A D
+    { name:'D', notes:[
+      [146.8, 0,    0.26, 3.2],  // D3 bass
+      [185.0, 0.5,  0.13, 2.0],  // F#3
+      [220.0, 1.0,  0.15, 1.8],  // A3
+      [293.7, 1.5,  0.18, 1.6],  // D4 melody
+      [369.9, 2.0,  0.18, 1.4],  // F#4 melody high
+      [293.7, 2.5,  0.12, 1.2],  // D4
+      [220.0, 3.0,  0.14, 1.5],  // A3
+      [185.0, 3.5,  0.10, 1.0],  // F#3
+    ]},
+    // Am — A bass + E A C
+    { name:'Am', notes:[
+      [110.0, 0,    0.27, 3.2],  // A2 bass
+      [164.8, 0.5,  0.13, 2.0],  // E3
+      [220.0, 1.0,  0.15, 1.8],  // A3
+      [261.6, 1.5,  0.17, 1.6],  // C4 melody
+      [329.6, 2.0,  0.19, 1.4],  // E4 melody high
+      [261.6, 2.5,  0.12, 1.2],  // C4
+      [220.0, 3.0,  0.14, 1.5],  // A3
+      [164.8, 3.5,  0.10, 1.0],  // E3
+    ]},
+  ];
+
+  // Progression: Em C G D  Em C Am D  (×∞)
+  const PROG=[0,1,2,3, 0,1,4,3];
+  let progIdx=0;
+
+  function scheduleBar(startTime){
+    const pat=PATTERNS[PROG[progIdx % PROG.length]];
+    progIdx++;
+    pat.notes.forEach(([freq,offB,vol,decB])=>{
+      pluck(freq, startTime + offB*B, vol, decB*B);
+    });
+    return startTime + B*4;
+  }
+
+  function startMusic(){
+    if(!ctx){
+      ctx=new(window.AudioContext||window.webkitAudioContext)();
+      master=ctx.createGain();
+      master.gain.value=0.0001;
+      rev=buildReverb(ctx);
+      dry=ctx.createGain(); dry.gain.value=0.60;
+      wet=ctx.createGain(); wet.gain.value=0.40;
+      master.connect(dry); dry.connect(ctx.destination);
+      master.connect(rev); rev.connect(wet); wet.connect(ctx.destination);
+    }
+    if(ctx.state==='suspended') ctx.resume();
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setValueAtTime(0.0001,ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0.88,ctx.currentTime+2);
+
+    let t=ctx.currentTime+0.1;
+    // Pre-schedule 3 bars
+    for(let i=0;i<3;i++) t=scheduleBar(t);
+    // Keep scheduling ahead
+    scheduler=setInterval(()=>{
+      if(!playing) return;
+      t=scheduleBar(t);
+    }, B*4*800); // schedule a new bar every ~bar duration ms
+  }
+
+  function stopMusic(){
+    clearInterval(scheduler);
+    if(master){
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setValueAtTime(master.gain.value,ctx.currentTime);
+      master.gain.linearRampToValueAtTime(0.0001,ctx.currentTime+1.5);
+    }
+  }
+
+  btn.addEventListener('click',()=>{
+    playing=!playing;
+    btn.classList.toggle('playing',playing);
+    if(playing){
+      startMusic();
+      const b=document.getElementById('gmBubble'),t=document.getElementById('gmText');
+      if(b&&t){t.textContent="🎵 Música ligada! Relaxa e aproveita!";b.classList.add('show');setTimeout(()=>b.classList.remove('show'),3500);}
+    } else {
+      stopMusic();
+    }
+  });
+})();
+
 </body>
 </html>
