@@ -368,9 +368,26 @@ footer{position:relative;z-index:1;padding:2.5rem 1.25rem;border-top:1px solid r
     </div>
     <div class="ef-row">
       <div class="ef"><label>Data</label><input type="date" id="edate" oninput="upSum()"></div>
-      <div class="ef"><label>Horário</label><input type="time" id="etime" oninput="upSum()"></div>
+      <div class="ef"><label>Horário de início</label><input type="time" id="etime" oninput="upSum()"></div>
     </div>
-    <div class="ef"><label>Música especial da noite</label><input type="text" id="esong" placeholder="Ex: Perfect — Ed Sheeran" oninput="upSum()"></div>
+    <div class="ef-row">
+      <div class="ef">
+        <label>Duração do show</label>
+        <select id="edur" oninput="upSum()" style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:#fff;font-family:'Rajdhani',sans-serif;font-size:16px;padding:12px 14px;outline:none;border-radius:2px;-webkit-appearance:none;appearance:none;transition:border-color .3s;">
+          <option value="" style="background:#0a0a1a">Selecione...</option>
+          <option value="1 hora" style="background:#0a0a1a">1 hora</option>
+          <option value="1h30" style="background:#0a0a1a">1h30</option>
+          <option value="2 horas" style="background:#0a0a1a">2 horas</option>
+          <option value="2h30" style="background:#0a0a1a">2h30</option>
+          <option value="3 horas" style="background:#0a0a1a">3 horas</option>
+          <option value="3h30" style="background:#0a0a1a">3h30</option>
+          <option value="4 horas" style="background:#0a0a1a">4 horas</option>
+          <option value="A combinar" style="background:#0a0a1a">A combinar</option>
+        </select>
+      </div>
+  
+    </div>
+
     <div class="ef"><label>Observações</label><textarea id="eobs" placeholder="Tema, pedido especial..." oninput="upSum()"></textarea></div>
     <div class="ev-sum">
       <div class="sum-head">// Resumo do evento</div>
@@ -379,6 +396,7 @@ footer{position:relative;z-index:1;padding:2.5rem 1.25rem;border-top:1px solid r
         <div class="si">Estilos<strong id="s-style">—</strong></div>
         <div class="si">Data<strong id="s-date">—</strong></div>
         <div class="si">Cidade<strong id="s-city">—</strong></div>
+        <div class="si">Duração<strong id="s-dur">—</strong></div>
         <div class="si">Especial<strong id="s-sp">—</strong></div>
       </div>
     </div>
@@ -474,8 +492,8 @@ document.querySelectorAll('.tli').forEach((el,i)=>{el.style.transitionDelay=i*.1
 let selType='',selStyles=[];
 document.querySelectorAll('#etypes .chip').forEach(c=>{c.addEventListener('click',function(){document.querySelectorAll('#etypes .chip').forEach(x=>x.classList.remove('active'));this.classList.add('active');selType=this.dataset.v;upSum();});});
 document.querySelectorAll('#estyles .chip').forEach(c=>{c.addEventListener('click',function(){this.classList.toggle('active');const v=this.dataset.v,i=selStyles.indexOf(v);if(i===-1)selStyles.push(v);else selStyles.splice(i,1);upSum();});});
-function upSum(){document.getElementById('s-type').textContent=selType||'—';document.getElementById('s-style').textContent=selStyles.length?selStyles.join(', '):'—';const dv=document.getElementById('edate').value;document.getElementById('s-date').textContent=dv?new Date(dv+'T12:00').toLocaleDateString('pt-BR'):'—';document.getElementById('s-city').textContent=document.getElementById('ecity').value||'—';document.getElementById('s-sp').textContent=document.getElementById('esong').value||'—';}
-document.getElementById('wppBtn').addEventListener('click',()=>{const nm=document.getElementById('cname').value||'Cliente';const dt=document.getElementById('edate').value;const tm=document.getElementById('etime').value;const ct=document.getElementById('ecity').value;const ob=document.getElementById('eobs').value;const sp=document.getElementById('esong').value;const df=dt?new Date(dt+'T12:00').toLocaleDateString('pt-BR'):'A definir';const st=selStyles.length?selStyles.join(', '):'A definir';const msg=`\uD83C\uDFB5 *CONTRATA\u00C7\u00C3O \u2014 Mauricio Santos*\n\nOl\u00E1! Vim pelo site:\n\n\uD83D\uDC64 *Nome:* ${nm}\n\uD83C\uDF89 *Evento:* ${selType||'A definir'}\n\uD83C\uDFB5 *Estilos:* ${st}\n\uD83D\uDCC5 *Data:* ${df}${tm?' \u00E0s '+tm:''}\n\uD83D\uDCCD *Cidade:* ${ct||'A definir'}\n\u2728 *Especial:* ${sp||'A definir'}\n\uD83D\uDCDD *Obs:* ${ob||'Nenhuma'}\n\nAguardo contato! \uD83D\uDE4F`;window.open('https://wa.me/5511958181611?text='+encodeURIComponent(msg),'_blank');});
+function upSum(){document.getElementById('s-type').textContent=selType||'—';document.getElementById('s-style').textContent=selStyles.length?selStyles.join(', '):'—';const dv=document.getElementById('edate').value;document.getElementById('s-date').textContent=dv?new Date(dv+'T12:00').toLocaleDateString('pt-BR'):'—';document.getElementById('s-city').textContent=document.getElementById('ecity').value||'—';const dur=document.getElementById('edur');document.getElementById('s-dur').textContent=dur&&dur.value?dur.value:'—';document.getElementById('s-sp').textContent=document.getElementById('esong').value||'—';}
+document.getElementById('wppBtn').addEventListener('click',()=>{const nm=document.getElementById('cname').value||'Cliente';const dt=document.getElementById('edate').value;const tm=document.getElementById('etime').value;const ct=document.getElementById('ecity').value;const ob=document.getElementById('eobs').value;const sp=document.getElementById('esong').value;const df=dt?new Date(dt+'T12:00').toLocaleDateString('pt-BR'):'A definir';const st=selStyles.length?selStyles.join(', '):'A definir';const durEl=document.getElementById('edur');const durStr=durEl&&durEl.value?durEl.value:'A combinar';const msg=`\uD83C\uDFB5 *CONTRATA\u00C7\u00C3O \u2014 Mauricio Santos*\n\nOl\u00E1! Vim pelo site:\n\n\uD83D\uDC64 *Nome:* ${nm}\n\uD83C\uDF89 *Evento:* ${selType||'A definir'}\n\uD83C\uDFB5 *Estilos:* ${st}\n\uD83D\uDCC5 *Data:* ${df}${tm?' \u00E0s '+tm:''}\n\uD83D\uDCCD *Cidade:* ${ct||'A definir'}\n\u23F1\uFE0F *Dura\u00E7\u00E3o:* ${durStr}\n\u2728 *Especial:* ${sp||'A definir'}\n\uD83D\uDCDD *Obs:* ${ob||'Nenhuma'}\n\nAguardo contato! \uD83D\uDE4F`;window.open('https://wa.me/5511958181611?text='+encodeURIComponent(msg),'_blank');});
 // MOBILE MENU
 (function(){const btn=document.getElementById('hambBtn'),menu=document.getElementById('mobileMenu');if(!btn||!menu)return;let scrollY=0;function open(){scrollY=window.scrollY;btn.classList.add('open');btn.setAttribute('aria-expanded','true');menu.classList.add('open');menu.setAttribute('aria-hidden','false');document.documentElement.style.setProperty('--scroll-y','-'+scrollY+'px');document.body.classList.add('menu-open');}function close(){btn.classList.remove('open');btn.setAttribute('aria-expanded','false');menu.classList.remove('open');menu.setAttribute('aria-hidden','true');document.body.classList.remove('menu-open');document.documentElement.style.setProperty('--scroll-y','0px');window.scrollTo(0,scrollY);}function toggle(e){e.preventDefault();e.stopPropagation();btn.classList.contains('open')?close():open();}btn.addEventListener('click',toggle);btn.addEventListener('touchend',toggle,{passive:false});document.querySelectorAll('[data-close]').forEach(a=>{a.addEventListener('click',()=>setTimeout(close,60));a.addEventListener('touchend',e=>{e.preventDefault();setTimeout(close,60);},{passive:false});});menu.addEventListener('click',e=>{if(e.target===menu)close();});document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});})();
 // GSAP
